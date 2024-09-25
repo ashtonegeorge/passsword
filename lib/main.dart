@@ -80,12 +80,43 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
     void _addSwordPopup(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
+    // showDialog(
+    //   context: context,
+    //   builder: (BuildContext context) {
+    //     return AlertDialog(
+    //       title: const Text('Add Sword'),
+    //       content: const Padding(padding: EdgeInsets.all(0.0), child:
+    //         Column(
+    //           mainAxisSize: MainAxisSize.min,
+    //           children: <Widget>[
+    //             TextField(
+    //               decoration: InputDecoration(labelText: 'Name'),
+    //             ),
+    //             TextField(
+    //               decoration: InputDecoration(labelText: 'Description'),
+    //             ),
+    //           ],
+    //         ),
+    //       ),
+    //       actions: <Widget>[
+    //         TextButton(
+    //           child: Text('Add'),
+    //           onPressed: () {
+    //             Navigator.of(context).pop();
+    //           },
+    //         ),
+    //       ],
+    //     );
+    //   },
+    // );
+      showDialog(context: context, builder: (BuildContext context) {
+        return Dialog(
+          child: SizedBox(
+            width: 300.0,
+            height: 200.0,
+            child: AlertDialog(
           title: const Text('Add Sword'),
-          content: const Padding(padding: EdgeInsets.all(8.0), child:
+          content: const Padding(padding: EdgeInsets.all(0.0), child:
             Column(
               mainAxisSize: MainAxisSize.min,
               children: <Widget>[
@@ -100,14 +131,16 @@ class _MyHomePageState extends State<MyHomePage> {
           ),
           actions: <Widget>[
             TextButton(
-              child: Text('OK'),
+              child: const Text('Add'),
               onPressed: () {
                 Navigator.of(context).pop();
               },
             ),
           ],
+            ),
+          ),
         );
-      },
+      }
     );
   }
 
