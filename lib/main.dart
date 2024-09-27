@@ -67,6 +67,11 @@ class _MyHomePageState extends State<MyHomePage> {
             });
             print(_selectedSwordType); // Print the selected sword type
           },
+          sheathes: [
+            "Sheath 1",
+            "Sheath 2",
+            "Sheath 3",
+          ],
         );
       },
     );
