@@ -1,15 +1,28 @@
 import 'package:flutter/material.dart';
-import 'package:passsword/sword_selection_popup.dart';
+import 'dart:io';
+import 'package:passsword/add_sword_popup.dart';
+import 'package:passsword/database_helper.dart';
 import 'swords_page.dart';
+import 'package:path/path.dart' as p; // Alias the path package import
+import 'package:sqflite_common_ffi/sqflite_ffi.dart'; // Import sqflite_ffi
+
 
 // TODO: 
-// Store the swords somewhere in local storage - UTILIZE HIVE NO SQL DATABASE
 // present the data in the swords page
 // create a sheathes dialogue box and dynamic pages
 // implement encryption and decryption
 
-void main() {
-  runApp(const MyApp());
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  // Initialize sqflite for desktop platforms
+  if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
+    sqfliteFfiInit();
+    databaseFactory = databaseFactoryFfi;
+  }
+
+  await DatabaseHelper().initDatabase();
+  runApp(MyApp());
 }
 
 class MyApp extends StatelessWidget {
@@ -22,7 +35,7 @@ class MyApp extends StatelessWidget {
       title: 'Flutter Demo',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
+        colorScheme: ColorScheme.fromSeed(seedColor: Color.fromARGB(255, 30, 80, 189)),
         useMaterial3: true,
       ),
       home: const MyHomePage(title: 'Flutter Demo Home Page'),
@@ -59,7 +72,7 @@ class _MyHomePageState extends State<MyHomePage> {
     showDialog(
       context: context,
       builder: (BuildContext context) {
-        return SwordSelectionPopup(
+        return AddSwordPopup(
           initialType: _selectedSwordType,
           onTypeSelected: (String newType) {
             setState(() {
@@ -81,22 +94,8 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.grey[400],
+        backgroundColor: Color.fromARGB(255, 30, 80, 189),
         title: const Text("PassSword"),
-        actions: [
-          Padding(padding: const EdgeInsets.all(10.0),
-          child: 
-            TextButton.icon(
-              onPressed: _showSwordPopup,
-              icon: const Icon(Icons.add),
-              label: const Text("Add Sword"),
-              style: const ButtonStyle(
-                  backgroundColor: WidgetStatePropertyAll(Color.fromARGB(255, 30, 80, 189)),
-                  foregroundColor: WidgetStatePropertyAll(Colors.white),
-              ),
-            ),
-          ),
-        ],
       ),
 
       body: Row(
@@ -113,9 +112,9 @@ class _MyHomePageState extends State<MyHomePage> {
                       padding: EdgeInsets.all(8.5),
                       child: Icon(Icons.password_sharp),
                     ),
-                    title: const Text('Swords'),
+                    title: const Text('All Swords'),
                     onTap: () {
-                      _navigateToPage(SwordsPage());
+                      _navigateToPage(const SwordsPage());
                     },
                   ),
                   ExpansionTile(
