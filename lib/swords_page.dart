@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:passsword/add_sword_popup.dart';
+import 'package:passsword/sword_details_popup.dart';
 import 'database_helper.dart';
 import 'sword_model.dart';
 
@@ -80,8 +81,17 @@ class _SwordsPageState extends State<SwordsPage> {
                       },
                     icon: const Icon(Icons.delete)
                   ),
-                  onTap: () { _showDetails(sword);     Scaffold.of(context).openEndDrawer();
- },
+                  onTap: () async { 
+                    _showDetails(sword);
+                    showDialog(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return SwordDetailsPopup(
+                          sword: selectedSword,
+                        );
+                      },
+                    ); 
+                  },
                 );
               },
             );
@@ -108,32 +118,6 @@ class _SwordsPageState extends State<SwordsPage> {
         label: const Text("Add Sword"),
         backgroundColor: const Color.fromARGB(255, 30, 80, 189),
         foregroundColor: Colors.white,
-      ),
-      endDrawer: Drawer(
-        child: ListView(
-          padding: EdgeInsets.zero,
-          children: <Widget>[
-            // DrawerHeader(
-            //   decoration: const BoxDecoration(
-            //     color: Colors.blue,
-            //   ),
-            //   child: Text(
-            //     selectedSword.name.isNotEmpty ? selectedSword.name : 'No Sword Selected',
-            //     style: const TextStyle(
-            //       color: Colors.white,
-            //       fontSize: 24,
-            //     ),
-            //   ),
-            // ),
-            ListTile(
-              title: Text('Type: ${selectedSword.type}'),
-            ),
-            ListTile(
-              title: Text('Sheath: ${selectedSword.sheath}'),
-            ),
-          ],
-        ),
-        clipBehavior: Clip.antiAlias,
       ),
     );
   }
