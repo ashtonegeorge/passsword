@@ -1,4 +1,5 @@
 import 'package:passsword/sword_model.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
 import 'database_helper.dart';
 
@@ -13,16 +14,18 @@ class SwordDetailsPopup extends StatefulWidget {
 
 class _SwordDetailsPopupState extends State<SwordDetailsPopup> {
   late TextEditingController _nameController;
-  late TextEditingController _descriptionController;
-  late TextEditingController _usernameController;
   late TextEditingController _passwordController;
+  late TextEditingController _usernameController;
   late TextEditingController _securityPhraseController;
   late String _selectedSwordType;
   String? _selectedSheath;
+  bool _obscureText = true;
+  bool _editing = false;
 
   @override
   void initState() {
     super.initState();
+    print(widget.sword.name);
     _nameController = TextEditingController(text: widget.sword.name);
     _usernameController = TextEditingController(text: widget.sword.username);
     _passwordController = TextEditingController(text: widget.sword.password);
@@ -34,7 +37,6 @@ class _SwordDetailsPopupState extends State<SwordDetailsPopup> {
   @override
   void dispose() {
     _nameController.dispose();
-    _descriptionController.dispose();
     _usernameController.dispose();
     _passwordController.dispose();
     _securityPhraseController.dispose();
@@ -51,84 +53,141 @@ class _SwordDetailsPopupState extends State<SwordDetailsPopup> {
       securityPhrase: _securityPhraseController.text,
       sheath: _selectedSheath ?? '',
     );
+    print(sword.username);
     await DatabaseHelper().updateSword(sword);
+    
   }
 
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: const Text('Sword Details'),
+      title: Text(_nameController.text),
       content: SingleChildScrollView(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
+        child: (widget.sword.type == 'Login') ? Column(
           children: [
-            DropdownButton<String>(
-              value: _selectedSwordType,
-              items: <String>['Katana', 'Broadsword', 'Rapier', 'Scimitar']
-                  .map((String value) {
-                return DropdownMenuItem<String>(
-                  value: value,
-                  child: Text(value),
-                );
-              }).toList(),
-              onChanged: (String? value) {
-                setState(() {
-                  _selectedSwordType = value!;
-                });
-              },
+            Row(
+              children: [
+                Expanded(
+                  child: TextField(
+                    readOnly: !_editing,
+                    controller: _usernameController,
+                    decoration: const InputDecoration(labelText: 'Username'),
+                  ),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.copy),
+                  onPressed: () {
+                    Clipboard.setData(ClipboardData(text: _usernameController.text));
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Username copied to clipboard')),
+                    );
+                  },
+                ),
+              ],
             ),
-            TextField(
-              controller: _nameController,
-              decoration: const InputDecoration(labelText: 'Name'),
+            Row(
+              children: [
+                Expanded(
+                  child: TextField(
+                    readOnly: !_editing,
+                    controller: _passwordController,
+                    decoration: const InputDecoration(labelText: 'Password'),
+                    obscureText: _obscureText,
+                  ),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.copy),
+                  onPressed: () {
+                    Clipboard.setData(ClipboardData(text: _passwordController.text));
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Password copied to clipboard')),
+                    );
+                  },
+                ),
+                IconButton(
+                  icon: (_obscureText) ? const Icon(Icons.remove_red_eye_outlined) : const Icon(Icons.remove_red_eye),
+                  onPressed: () {
+                    setState(() {
+                      _obscureText = !_obscureText;
+                    });
+                  },
+                ),
+              ],
             ),
-            TextField(
-              controller: _descriptionController,
-              decoration: const InputDecoration(labelText: 'Description'),
-            ),
-            TextField(
-              controller: _usernameController,
-              decoration: const InputDecoration(labelText: 'Username'),
-            ),
-            TextField(
-              controller: _passwordController,
-              decoration: const InputDecoration(labelText: 'Password'),
-            ),
-            TextField(
-              controller: _securityPhraseController,
-              decoration: const InputDecoration(labelText: 'Security Phrase'),
-            ),
-            DropdownButton<String>(
-              value: _selectedSheath,
-              items: <String>['Sheath 1', 'Sheath 2', 'Sheath 3']
-                  .map((String value) {
-                return DropdownMenuItem<String>(
-                  value: value,
-                  child: Text(value),
-                );
-              }).toList(),
-              onChanged: (String? value) {
-                setState(() {
-                  _selectedSheath = value;
-                });
-              },
-            ),
+          ],
+        ) : Column (
+          children: [
+            Row(
+              children: [
+                Expanded(
+                  child: TextField(
+                    readOnly: !_editing,
+                    controller: _securityPhraseController,
+                    decoration: InputDecoration(labelText: widget.sword.name),
+                  ), 
+                ),
+                IconButton(
+                  icon: const Icon(Icons.copy),
+                  onPressed: () {
+                    Clipboard.setData(ClipboardData(text: _securityPhraseController.text));
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Security Phrase copied to clipboard')),
+                    );
+                  },
+                ),
+              ],
+            )
           ],
         ),
       ),
-      actions: <Widget>[
-        TextButton(
-          onPressed: () {
-            Navigator.of(context).pop();
-          },
-          child: const Text('Cancel'),
-        ),
-        TextButton(
-          onPressed: () async {
-            await _saveSword();
-            Navigator.of(context).pop();
-          },
-          child: const Text('Save'),
-        ),
+      actions: [
+        if (!_editing)
+          Align(
+            alignment: Alignment.bottomRight,
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextButton(
+                  onPressed: () {
+                    setState(() {
+                      _editing = true;
+                    });
+                  },
+                  child: Text('Edit'),
+                ),
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                  child: Text('Done'),
+                ),
+              ],
+            ),
+          )
+        else
+          Align(
+            alignment: Alignment.bottomRight,
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextButton(
+                  onPressed: () async {
+                    await _saveSword();
+                    setState(() {
+                      _editing = false;
+                    });
+                  },
+                  child: Text('Save'),
+                ),
+                TextButton(
+                  onPressed: () async {
+                    Navigator.of(context).pop();
+                  },
+                  child: Text('Cancel'),
+                ),
+              ],
+            ),
+          ),
       ],
     );
   }
