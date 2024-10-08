@@ -5,33 +5,35 @@ import 'database_helper.dart';
 
 class SwordDetailsPopup extends StatefulWidget {
   final Sword sword;
+  final Function(Sword) onUpdate;
 
-  const SwordDetailsPopup({required this.sword});
+  const SwordDetailsPopup({required this.sword, required this.onUpdate});
 
   @override
   _SwordDetailsPopupState createState() => _SwordDetailsPopupState();
 }
 
 class _SwordDetailsPopupState extends State<SwordDetailsPopup> {
+  late Sword _sword;
   late TextEditingController _nameController;
   late TextEditingController _passwordController;
   late TextEditingController _usernameController;
   late TextEditingController _securityPhraseController;
   late String _selectedSwordType;
-  String? _selectedSheath;
+  int? _selectedSheathId;
   bool _obscureText = true;
   bool _editing = false;
 
   @override
   void initState() {
     super.initState();
-    print(widget.sword.name);
-    _nameController = TextEditingController(text: widget.sword.name);
-    _usernameController = TextEditingController(text: widget.sword.username);
-    _passwordController = TextEditingController(text: widget.sword.password);
-    _securityPhraseController = TextEditingController(text: widget.sword.securityPhrase);
-    _selectedSwordType = widget.sword.type;
-    _selectedSheath = widget.sword.sheath;
+    _sword = widget.sword;
+    _nameController = TextEditingController(text: _sword.name);
+    _usernameController = TextEditingController(text: _sword.username);
+    _passwordController = TextEditingController(text: _sword.password);
+    _securityPhraseController = TextEditingController(text: _sword.securityPhrase);
+    _selectedSwordType = _sword.type;
+    _selectedSheathId = _sword.sheathId;
   }
 
   @override
@@ -51,10 +53,13 @@ class _SwordDetailsPopupState extends State<SwordDetailsPopup> {
       username: _usernameController.text,
       password: _passwordController.text,
       securityPhrase: _securityPhraseController.text,
-      sheath: _selectedSheath ?? '',
+      sheathId: _selectedSheathId ?? -1,
     );
-    print(sword.username);
     await DatabaseHelper().updateSword(sword);
+    widget.onUpdate(_sword);
+    setState(() {
+      _sword = sword;
+    });
     
   }
 
@@ -63,7 +68,7 @@ class _SwordDetailsPopupState extends State<SwordDetailsPopup> {
     return AlertDialog(
       title: Text(_nameController.text),
       content: SingleChildScrollView(
-        child: (widget.sword.type == 'Login') ? Column(
+        child: (_sword.type == 'Login') ? Column(
           children: [
             Row(
               children: [
@@ -123,7 +128,7 @@ class _SwordDetailsPopupState extends State<SwordDetailsPopup> {
                   child: TextField(
                     readOnly: !_editing,
                     controller: _securityPhraseController,
-                    decoration: InputDecoration(labelText: widget.sword.name),
+                    decoration: InputDecoration(labelText: _sword.name),
                   ), 
                 ),
                 IconButton(
@@ -177,13 +182,13 @@ class _SwordDetailsPopupState extends State<SwordDetailsPopup> {
                       _editing = false;
                     });
                   },
-                  child: Text('Save'),
+                  child: const Text('Save'),
                 ),
                 TextButton(
                   onPressed: () async {
                     Navigator.of(context).pop();
                   },
-                  child: Text('Cancel'),
+                  child: const Text('Cancel'),
                 ),
               ],
             ),

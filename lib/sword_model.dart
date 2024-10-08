@@ -6,7 +6,7 @@ class Sword {
   final String username;
   final String password;
   final String securityPhrase;
-  final String sheath;
+  final int? sheathId;
 
   Sword({
     this.id,
@@ -15,7 +15,7 @@ class Sword {
     required this.username,
     required this.password,
     required this.securityPhrase,
-    required this.sheath,
+    this.sheathId,
   });
 
   Map<String, dynamic> toMap() {
@@ -25,7 +25,7 @@ class Sword {
       'username': username,
       'password': password,
       'securityPhrase': securityPhrase,
-      'sheath': sheath,
+      'sheath_id': sheathId,
     };
   }
 
@@ -37,7 +37,7 @@ class Sword {
       username: map['username'],
       password: map['password'],
       securityPhrase: map['securityPhrase'],
-      sheath: map['sheath'],
+      sheathId: map['sheath_id'],
     );
   }
 }

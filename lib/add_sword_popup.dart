@@ -1,16 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:passsword/sheath_model.dart';
 import 'database_helper.dart';
 import 'sword_model.dart';
 
 class AddSwordPopup extends StatefulWidget {
   final String initialType;
   final ValueChanged<String> onTypeSelected;
-  final List<String> sheathes; // Add this parameter
+  final List<Sheath> sheathes; 
 
   const AddSwordPopup({
     required this.initialType,
     required this.onTypeSelected,
-    required this.sheathes, // Add this parameter
+    required this.sheathes,
   });
 
   @override
@@ -24,7 +25,8 @@ class _AddSwordPopupState extends State<AddSwordPopup> {
   late TextEditingController _passwordController;
   late TextEditingController _securityPhraseController;
   late String _selectedSwordType;
-  String? _selectedSheath;
+  int? _selectedSheathId;
+  bool _obscureText = true;
 
   @override
   void initState() {
@@ -54,9 +56,9 @@ class _AddSwordPopupState extends State<AddSwordPopup> {
       username: _usernameController.text,
       password: _passwordController.text,
       securityPhrase: _securityPhraseController.text,
-      sheath: _selectedSheath ?? '',
+      sheathId: _selectedSheathId ?? -1,
     );
-  await DatabaseHelper().insertSword(sword);
+    await DatabaseHelper().updateSword(sword);
   }
 
   @override
@@ -113,15 +115,31 @@ class _AddSwordPopupState extends State<AddSwordPopup> {
                 ),
               ),
               const SizedBox(height: 16.0),
-              TextField(
-                controller: _passwordController,
-                decoration: const InputDecoration(
-                  labelText: 'Password',
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.all(Radius.circular(8.0)),
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Expanded(child: 
+                    TextField(
+                      controller: _passwordController,
+                      obscureText: _obscureText,
+                      decoration: const InputDecoration(
+                        labelText: 'Password',
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.all(Radius.circular(8.0)),
+                        ),
+                      ),
+                    ),
                   ),
-                ),
-              ),
+                  IconButton(
+                    icon: (_obscureText) ? const Icon(Icons.remove_red_eye_outlined) : const Icon(Icons.remove_red_eye),
+                    onPressed: () {
+                      setState(() {
+                        _obscureText = !_obscureText;
+                      });
+                    },
+                  ),
+                ],
+              )
             ] else if (_selectedSwordType == 'Security Phrase') ...[
               TextField(
                 controller: _securityPhraseController,
@@ -134,17 +152,17 @@ class _AddSwordPopupState extends State<AddSwordPopup> {
               ),
             ],
             const SizedBox(height: 16.0),
-            DropdownButtonFormField<String>(
-              value: _selectedSheath,
+            DropdownButtonFormField<int>(
+              value: _selectedSheathId,
               items: widget.sheathes.map((sheath) {
-                return DropdownMenuItem<String>(
-                  value: sheath,
-                  child: Text(sheath),
+                return DropdownMenuItem<int>(
+                  value: sheath.id,
+                  child: Text(sheath.name),
                 );
               }).toList(),
-              onChanged: (String? newValue) {
+              onChanged: (int? newValue) {
                 setState(() {
-                  _selectedSheath = newValue!;
+                  _selectedSheathId = newValue!;
                 });
               },
               decoration: const InputDecoration(
@@ -161,14 +179,6 @@ class _AddSwordPopupState extends State<AddSwordPopup> {
         TextButton(
           onPressed: () {
             widget.onTypeSelected(_selectedSwordType);
-            // Use the collected form data here
-            print('Selected Sword Type: $_selectedSwordType');
-            print('Name: ${_nameController.text}');
-            print('Description: ${_descriptionController.text}');
-            print('Username: ${_usernameController.text}');
-            print('Password: ${_passwordController.text}');
-            print('Security Phrase: ${_securityPhraseController.text}');
-            print('Sheath: $_selectedSheath');
             _saveSword();
             Navigator.of(context).pop(true);
           },

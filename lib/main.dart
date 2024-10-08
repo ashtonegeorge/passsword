@@ -3,12 +3,9 @@ import 'dart:io';
 import 'package:passsword/add_sword_popup.dart';
 import 'package:passsword/database_helper.dart';
 import 'swords_page.dart';
-import 'package:path/path.dart' as p; // Alias the path package import
-import 'package:sqflite_common_ffi/sqflite_ffi.dart'; // Import sqflite_ffi
-
+import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
 // TODO: 
-// present the data in the swords page
 // create a sheathes dialogue box and dynamic pages
 // implement encryption and decryption
 
@@ -68,7 +65,8 @@ class _MyHomePageState extends State<MyHomePage> {
     });
   }
 
-  void _showSwordPopup() {
+  void _showSwordPopup() async {
+    final sheathes = await DatabaseHelper().getSheathes();
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -78,13 +76,8 @@ class _MyHomePageState extends State<MyHomePage> {
             setState(() {
               _selectedSwordType = newType;
             });
-            print(_selectedSwordType); // Print the selected sword type
           },
-          sheathes: [
-            "Sheath 1",
-            "Sheath 2",
-            "Sheath 3",
-          ],
+          sheathes: sheathes,
         );
       },
     );
@@ -101,7 +94,7 @@ class _MyHomePageState extends State<MyHomePage> {
       body: Row(
         children: <Widget>[
           Flexible(
-            flex: 1, // Adjust this value to control the width proportion
+            flex: 1, 
             child: Container(
               color: Colors.grey[200],
               child: ListView(
@@ -118,7 +111,13 @@ class _MyHomePageState extends State<MyHomePage> {
                     },
                   ),
                   ExpansionTile(
-                    leading: IconButton(onPressed: () => print("add"), icon: const Icon(Icons.add)),
+                    leading: IconButton(
+                      onPressed: () => {
+                        // show addSheath dialog
+                        print("add")
+                      }, 
+                      icon: const Icon(Icons.add)
+                    ),
                     title: const Text('Sheathes'),
                     children: const <Widget>[
                       
@@ -129,7 +128,7 @@ class _MyHomePageState extends State<MyHomePage> {
             ),
           ),
           Flexible(
-            flex: 3, // Adjust this value to control the width proportion
+            flex: 3,
             child: _selectedPage,
           ),
         ],

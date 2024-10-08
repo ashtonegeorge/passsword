@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:passsword/add_sword_popup.dart';
+import 'package:passsword/sheath_model.dart';
 import 'package:passsword/sword_details_popup.dart';
 import 'database_helper.dart';
 import 'sword_model.dart';
@@ -26,7 +27,7 @@ class _SwordsPageState extends State<SwordsPage> {
       username: '',
       password: '',
       securityPhrase: '',
-      sheath: '',
+      sheathId: -1,
     );
   }
   
@@ -36,10 +37,26 @@ class _SwordsPageState extends State<SwordsPage> {
     });
   }
 
+  void _updateSword(Sword updatedSword) {
+    setState(() {
+      selectedSword = updatedSword;
+      _swordsFuture = DatabaseHelper().getSwords();
+    });
+  }
+
   void _showDetails(Sword s) async {
     setState(() {
       selectedSword = s;
     });
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return SwordDetailsPopup(
+          sword: selectedSword,
+          onUpdate: _updateSword,
+        );
+      },
+    ); 
   }
 
   @override
@@ -47,8 +64,7 @@ class _SwordsPageState extends State<SwordsPage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('All Swords'),
-        automaticallyImplyLeading: false,
-        
+        automaticallyImplyLeading: true,
       ),
       body: FutureBuilder<List<Sword>>(
         future: _swordsFuture,
@@ -65,32 +81,36 @@ class _SwordsPageState extends State<SwordsPage> {
               itemCount: swords.length,
               itemBuilder: (context, index) {
                 final sword = swords[index];
-                return ListTile(
-                  title: Text(sword.name),
-                  leading: (sword.type == 'Login')
-                      ? const Icon(Icons.login)
-                      : (sword.type == 'Security Phrase')
-                          ? const Icon(Icons.security)
-                          : const Icon(Icons.help),
-
-                  subtitle: Text('Type: ${sword.type}, Sheath: ${sword.sheath}'),
-                  trailing: IconButton(
-                    onPressed: () async { 
-                      DatabaseHelper().deleteSword(sword.id!);
-                      _refreshSwords();
+                return FutureBuilder<Sheath?>(
+                  future: (sword.sheathId != -1) ? DatabaseHelper().getSheathById(sword.sheathId!) : Future.value(null),
+                  builder: (context, sheathSnapshot) {
+                    String sheathName = "None";
+                    if (sheathSnapshot.connectionState == ConnectionState.waiting) {
+                      sheathName = "Loading...";
+                    } else if (sheathSnapshot.hasError) {
+                      sheathName = "Error";
+                    } else if (sheathSnapshot.hasData && sheathSnapshot.data != null) {
+                      sheathName = sheathSnapshot.data!.name;
+                    }
+                    return ListTile(
+                      title: Text(sword.name),
+                      leading: (sword.type == 'Login')
+                          ? const Icon(Icons.login)
+                          : (sword.type == 'Security Phrase')
+                              ? const Icon(Icons.security)
+                              : const Icon(Icons.help),
+                      subtitle: Text('Type: ${sword.type}, Sheath: $sheathName'),
+                      trailing: IconButton(
+                        onPressed: () async { 
+                          DatabaseHelper().deleteSword(sword.id!);
+                          _refreshSwords();
+                        },
+                        icon: const Icon(Icons.delete)
+                      ),
+                      onTap: () async { 
+                        _showDetails(sword);
                       },
-                    icon: const Icon(Icons.delete)
-                  ),
-                  onTap: () async { 
-                    _showDetails(sword);
-                    showDialog(
-                      context: context,
-                      builder: (BuildContext context) {
-                        return SwordDetailsPopup(
-                          sword: selectedSword,
-                        );
-                      },
-                    ); 
+                    );
                   },
                 );
               },
@@ -100,13 +120,14 @@ class _SwordsPageState extends State<SwordsPage> {
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () async {
+          List<Sheath> sheathes = await DatabaseHelper().getSheathes();
           final result = await showDialog(
             context: context,
             builder: (BuildContext context) {
               return AddSwordPopup(
                 initialType: 'Login',
                 onTypeSelected: (String newType) {},
-                sheathes: ['one', 'two', 'three'],
+                sheathes: sheathes,
               );
             },
           );
