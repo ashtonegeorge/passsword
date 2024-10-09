@@ -39,7 +39,8 @@ class _AddSheathPopupState extends State<AddSheathPopup> {
     final sheath = Sheath(
       name: _nameController.text.isNotEmpty ? _nameController.text : 'Unnamed', // Provide a default value
     );
-    await DatabaseHelper().insertSheath(sheath);
+    print(sheath.toMap());
+    await DatabaseHelper().insertSheath(sheath.toMap());
     widget.onTypeSelected(_selectedSheathType);
     Navigator.of(context).pop();
   }

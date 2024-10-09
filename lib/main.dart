@@ -20,7 +20,7 @@ void main() async {
   }
 
   await DatabaseHelper().initDatabase();
-  runApp(MyApp());
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
@@ -82,32 +82,13 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 
-  void _showSwordPopup() async {
-    final sheathes = await DatabaseHelper().getSheathes();
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AddSwordPopup(
-          initialType: _selectedSwordType,
-          onTypeSelected: (String newType) {
-            setState(() {
-              _selectedSwordType = newType;
-            });
-          },
-          sheathes: sheathes,
-        );
-      },
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Color.fromARGB(255, 30, 80, 189),
+        backgroundColor: const Color.fromARGB(255, 30, 80, 189),
         title: const Text("PassSword"),
       ),
-
       body: Row(
         children: <Widget>[
           Flexible(
@@ -137,7 +118,9 @@ class _MyHomePageState extends State<MyHomePage> {
                     ),
                     title: const Text('Sheathes'),
                     children: const <Widget>[
-                      
+                      ListView.builder(
+                        itemCount: ,
+                        itemBuilder: (context, index))
                     ],
                   ),
                 ],

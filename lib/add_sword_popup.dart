@@ -63,7 +63,7 @@ class _AddSwordPopupState extends State<AddSwordPopup> {
     );
     if (sword.id == null) {
       // Handle the case where the id is null (e.g., insert a new record)
-      await DatabaseHelper().insertSword(sword);
+      await DatabaseHelper().insertSword(sword.toMap());
     } else {
       await DatabaseHelper().updateSword(sword);
     }

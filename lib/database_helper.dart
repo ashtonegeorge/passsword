@@ -63,11 +63,15 @@ Future<void> _onCreate(Database db, int version) async {
   '''); // foreign key separate table to manage relationships separately
 }
 
-  Future<int> insertSword(Sword sword) async {
-    Database db = await database;
-    return await db.insert('swords', sword.toMap());
+  Future<int> insertSword(Map<String, dynamic> sword) async {
+    final db = await database;
+    return await db.insert(
+      'swords',
+      sword,
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
   }
-
+  
   Future<List<Sword>> getSwords() async {
     Database db = await database;
     List<Map<String, dynamic>> swords = await db.query('swords');
@@ -120,10 +124,26 @@ Future<void> _onCreate(Database db, int version) async {
       throw Exception('Sheath with id $id not found');
     }
   }
-  Future<int> insertSheath(Sheath sheath) async {
-    Database db = await database;
-    return await db.insert('sheathes', sheath.toMap());
+  Future<void> insertSheath(Map<String, dynamic> sheath) async {
+    final db = await database;
+    await db.insert(
+      'sheathes',
+      sheath,
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
   }
+  Future<void> insertSwordSheath(int swordId, int sheathId) async {
+    final db = await database;
+    await db.insert(
+      'sword_sheath',
+      {
+        'sword_id': swordId,
+        'sheath_id': sheathId,
+      },
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+  }
+
   Future<int> deleteSheath(int id) async {
     Database db = await database;
     return await db.delete(
