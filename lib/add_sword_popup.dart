@@ -25,7 +25,7 @@ class _AddSwordPopupState extends State<AddSwordPopup> {
   late TextEditingController _passwordController;
   late TextEditingController _securityPhraseController;
   late String _selectedSwordType;
-  int? _selectedSheathId;
+  int? _selectedSheathId = 0;
   bool _obscureText = true;
 
   @override
@@ -37,6 +37,9 @@ class _AddSwordPopupState extends State<AddSwordPopup> {
     _passwordController = TextEditingController();
     _securityPhraseController = TextEditingController();
     _selectedSwordType = widget.initialType;
+
+    widget.sheathes.insert(0, Sheath(id: 0, name: 'None'));
+    _selectedSheathId = 0;
   }
 
   @override
@@ -52,13 +55,18 @@ class _AddSwordPopupState extends State<AddSwordPopup> {
   Future<void> _saveSword() async {
     final sword = Sword(
       type: _selectedSwordType,
-      name: _nameController.text,
-      username: _usernameController.text,
-      password: _passwordController.text,
-      securityPhrase: _securityPhraseController.text,
-      sheathId: _selectedSheathId ?? -1,
+      name: _nameController.text.isNotEmpty ? _nameController.text : 'Unnamed', // Provide a default value
+      username: _usernameController.text.isNotEmpty ? _usernameController.text : 'Unknown', // Provide a default value
+      password: _passwordController.text.isNotEmpty ? _passwordController.text : 'Unknown', // Provide a default value
+      securityPhrase: _securityPhraseController.text.isNotEmpty ? _securityPhraseController.text : 'None', // Provide a default value
+      sheathId: _selectedSheathId ?? 0, // Ensure sheathId is not null
     );
-    await DatabaseHelper().updateSword(sword);
+    if (sword.id == null) {
+      // Handle the case where the id is null (e.g., insert a new record)
+      await DatabaseHelper().insertSword(sword);
+    } else {
+      await DatabaseHelper().updateSword(sword);
+    }
   }
 
   @override

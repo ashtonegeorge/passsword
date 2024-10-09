@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:passsword/add_sheath_popup.dart';
 import 'dart:io';
 import 'package:passsword/add_sword_popup.dart';
 import 'package:passsword/database_helper.dart';
@@ -65,6 +66,22 @@ class _MyHomePageState extends State<MyHomePage> {
     });
   }
 
+  void _addSheath() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AddSheathPopup(
+          initialType: _selectedSwordType,
+          onTypeSelected: (String newType) {
+            setState(() {
+              _selectedSwordType = newType;
+            });
+          },
+        );
+      },
+    );
+  }
+
   void _showSwordPopup() async {
     final sheathes = await DatabaseHelper().getSheathes();
     showDialog(
@@ -114,7 +131,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     leading: IconButton(
                       onPressed: () => {
                         // show addSheath dialog
-                        print("add")
+                        _addSheath()
                       }, 
                       icon: const Icon(Icons.add)
                     ),
@@ -136,3 +153,4 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 }
+

@@ -82,7 +82,9 @@ class _SwordsPageState extends State<SwordsPage> {
               itemBuilder: (context, index) {
                 final sword = swords[index];
                 return FutureBuilder<Sheath?>(
-                  future: (sword.sheathId != -1) ? DatabaseHelper().getSheathById(sword.sheathId!) : Future.value(null),
+                  future: (sword.sheathId != null && sword.sheathId != -1)
+                      ? DatabaseHelper().getSheathById(sword.sheathId!)
+                      : Future.value(null),
                   builder: (context, sheathSnapshot) {
                     String sheathName = "None";
                     if (sheathSnapshot.connectionState == ConnectionState.waiting) {
@@ -101,13 +103,12 @@ class _SwordsPageState extends State<SwordsPage> {
                               : const Icon(Icons.help),
                       subtitle: Text('Type: ${sword.type}, Sheath: $sheathName'),
                       trailing: IconButton(
-                        onPressed: () async { 
-                          DatabaseHelper().deleteSword(sword.id!);
-                          _refreshSwords();
+                        onPressed: () async {
+                          await DatabaseHelper().deleteSword(sword.id!);
                         },
-                        icon: const Icon(Icons.delete)
+                        icon: const Icon(Icons.delete),
                       ),
-                      onTap: () async { 
+                      onTap: () async {
                         _showDetails(sword);
                       },
                     );

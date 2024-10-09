@@ -1,4 +1,5 @@
-// class representation of a password object
+import 'dart:ffi';
+
 class Sword {
   final int? id;
   final String type;
@@ -6,7 +7,7 @@ class Sword {
   final String username;
   final String password;
   final String securityPhrase;
-  final int? sheathId;
+  final int? sheathId; // Ensure this is int
 
   Sword({
     this.id,
@@ -19,14 +20,19 @@ class Sword {
   });
 
   Map<String, dynamic> toMap() {
-    return {
+    print(sheathId ?? -1);
+    final Map<String, dynamic> map = {
       'type': type,
       'name': name,
       'username': username,
       'password': password,
       'securityPhrase': securityPhrase,
-      'sheath_id': sheathId,
+      'sheath_id' : sheathId ?? 0,
     };
+    if (id != null) {
+      map['id'] = id;
+    }
+    return map;
   }
 
   static Sword fromMap(Map<String, dynamic> map) {
@@ -37,7 +43,7 @@ class Sword {
       username: map['username'],
       password: map['password'],
       securityPhrase: map['securityPhrase'],
-      sheathId: map['sheath_id'],
+      sheathId: map['sheath_id'] != null ? map['sheath_id'] as int : null,
     );
   }
 }

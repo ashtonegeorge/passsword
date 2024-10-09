@@ -40,8 +40,8 @@ Future<void> _onCreate(Database db, int version) async {
       username TEXT,
       password TEXT,
       securityPhrase TEXT,
-      sheath_id INTEGER, // Add this column
-      FOREIGN KEY (sheath_id) REFERENCES sheathes(id) // Add the foreign key constraint
+      sheath_id INTEGER, 
+      FOREIGN KEY (sheath_id) REFERENCES sheathes(id) 
     )
   ''');
 
@@ -77,6 +77,10 @@ Future<void> _onCreate(Database db, int version) async {
   }
 
   Future<int> updateSword(Sword sword) async {
+    if (sword.id == null) {
+      throw ArgumentError('Sword id cannot be null for update operation');
+    }
+
     Database db = await database;
     return await db.update(
       'swords',
@@ -115,6 +119,10 @@ Future<void> _onCreate(Database db, int version) async {
     } else {
       throw Exception('Sheath with id $id not found');
     }
+  }
+  Future<int> insertSheath(Sheath sheath) async {
+    Database db = await database;
+    return await db.insert('sheathes', sheath.toMap());
   }
   Future<int> deleteSheath(int id) async {
     Database db = await database;
